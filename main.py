@@ -32,16 +32,20 @@ class IDS010(discord.Client):
         super().__init__(*args, **kwargs)
         self.bg_task = self.loop.create_task(self.seeker_bg_task())
 
-    @client.event
     async def on_ready(self):
         print('{0.user} is ready'.format(client))
 
-    @client.event
+    @staticmethod
     async def on_message(message):
         if message.author == client.user:
             return
         if message.content.startswith('$hello'):
             await message.channel.send('Hello!')
+        if message.content.startswith('$stat'): #works but ugly
+            fmt = '{:^10} | {:^10} | {:^20} | {:^3}'.format('IP Address', 'MAC Address', 'Manufacturer', 'TTL')
+            fmt += '\n' + '-'*52 + '\n'
+            fmt += '\n'.join('{:10} | {:10} | {:20} | {:3}'.format(*x) for x in hosts)
+            await message.channel.send(fmt)
 
     @staticmethod
     def seek():
