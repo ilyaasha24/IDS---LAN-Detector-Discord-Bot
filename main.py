@@ -35,8 +35,7 @@ class IDS010(discord.Client):
     async def on_ready(self):
         print('{0.user} is ready'.format(client))
 
-    @staticmethod
-    async def on_message(message):
+    async def on_message(self, message):
         if message.author == client.user:
             return
         if message.content.startswith('$hello'):
@@ -75,8 +74,9 @@ class IDS010(discord.Client):
             await channel.send(fmt)
 
         else:
-            newhosts = shosts - hosts
-            ghosts = hosts - shosts
+            newhosts = [(x[0],x[1],x[2],x[3]) for x in shosts if not (any(x[0]==y[0] for y in hosts))]
+            ghosts = [(x[0],x[1],x[2],x[3]) for x in hosts if not (any(x[0]==y[0] for y in shosts))]
+
             for host in newhosts:
                 hosts.append(host)
                 fmt = '+++ Device Connected : {0} +++'.format(localtime)
@@ -85,7 +85,9 @@ class IDS010(discord.Client):
 
             for host in hosts:
                 if any(host[0] == ghost[0] for ghost in ghosts):
-                    host[3] -= 1
+                    hosts[hosts.index(host)] = (host[0],host[1],host[2],host[3]-1)
+
+            for host in hosts:
                 if host[3] <= 0:
                     hosts.remove(host)
                     fmt = '--- Device Disconnected : {0} ---'.format(localtime)
